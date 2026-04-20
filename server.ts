@@ -4,8 +4,37 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
+import axios from "axios";
+import admin from "firebase-admin";
+import { getFirestore } from "firebase-admin/firestore";
 
 dotenv.config();
+
+// Firebase Admin initialization for backend sync
+try {
+  if (!admin.apps.length) {
+    admin.initializeApp({
+      projectId: "gen-lang-client-0593654539",
+    });
+  }
+} catch (e) {
+  console.error("Firebase Admin Init Error:", e);
+}
+
+// Lazy Firestore getter
+let _firestoreDb: any = null;
+const getFirestoreDb = () => {
+  if (!_firestoreDb) {
+    try {
+      _firestoreDb = getFirestore(admin.app(), "ai-studio-df493c29-c276-4f6f-9f2f-3f305cb3621d");
+    } catch (e) {
+      console.error("Firestore Init Error:", e);
+    }
+  }
+  return _firestoreDb;
+};
+
+const appId = "1:547046490689:web:a3b5378ebf80f423c8fcc0";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -15,6 +44,10 @@ async function startServer() {
   const PORT = 3000;
 
   app.use(express.json());
+
+  app.get("/api/health", (req, res) => {
+    res.json({ status: "ok" });
+  });
 
   // API Route for Sports Data using Gemini
   app.get("/api/sports", async (req, res) => {
@@ -281,20 +314,90 @@ async function startServer() {
 
   app.get("/api/casino/providers", async (req, res) => {
     try {
-      const response = await fetch(`https://${CASINO_API_HOST}/getallproviders`, {
-        method: "GET",
+      const response = await axios.get(`https://${CASINO_API_HOST}/getallproviders`, {
         headers: {
           "x-rapidapi-host": CASINO_API_HOST,
           "x-rapidapi-key": CASINO_API_KEY,
         },
       });
 
-      if (!response.ok) throw new Error(`Casino API Error: ${response.status}`);
-      const data = await response.json();
-      res.json(data);
+      res.json(response.data);
     } catch (err) {
       console.error("Casino Providers Error:", err);
       res.status(500).json({ error: "Failed to fetch casino providers" });
+    }
+  });
+
+  // --- Casino Callback for Seamless Wallet ---
+  app.post("/api/casino/callback", async (req, res) => {
+    try {
+      console.log("Casino Callback Received:", JSON.stringify(req.body));
+      
+      const { 
+        member_account, 
+        bet_amount = 0, 
+        win_amount = 0, 
+      } = req.body;
+
+      const username = member_account || req.body.username; 
+
+      if (!username) {
+        return res.json({ success: false, msg: "Missing member account" });
+      }
+
+      const firestore = getFirestoreDb();
+      if (!firestore) return res.json({ success: false, msg: "Database connection failed" });
+
+      const userRef = firestore.doc(`artifacts/${appId}/users/${username}`);
+      const userSnap = await userRef.get();
+
+      if (!userSnap.exists) {
+        console.error(`User ${username} not found for callback`);
+        return res.json({ success: false, msg: "User account not found" });
+      }
+
+      const userData = userSnap.data() || {};
+      const currentBalance = userData.balance || 0;
+
+      const bet = parseFloat(bet_amount.toString());
+      const win = parseFloat(win_amount.toString());
+      const newBalance = currentBalance - bet + win;
+
+      await userRef.update({ 
+        balance: newBalance,
+        totalWagered: admin.firestore.FieldValue.increment(bet),
+        updatedAt: new Date().toISOString()
+      });
+
+      console.log(`Updated balance for ${username}: ${currentBalance} -> ${newBalance}`);
+
+      return res.json({ 
+        success: true, 
+        msg: "Callback processed successfully", 
+        handle: true, 
+        money: parseFloat(newBalance.toFixed(2)) 
+      });
+      
+    } catch (err) {
+      console.error("Casino Callback Error:", err);
+      res.json({ success: false, msg: "Internal server error" });
+    }
+  });
+
+  app.get("/api/casino/games/:providerId", async (req, res) => {
+    try {
+      const { providerId } = req.params;
+      const response = await axios.get(`https://${CASINO_API_HOST}/getallgames?providerId=${providerId}`, {
+        headers: {
+          "x-rapidapi-host": CASINO_API_HOST,
+          "x-rapidapi-key": CASINO_API_KEY,
+        },
+      });
+
+      res.json(response.data);
+    } catch (err) {
+      console.error("Casino Games Error:", err);
+      res.status(500).json({ error: "Failed to fetch games for provider" });
     }
   });
 
@@ -302,39 +405,35 @@ async function startServer() {
     try {
       const { username, gameId, currency, balance } = req.body;
       const origin = req.headers.origin || "https://lsbaji.com";
+      const host = req.headers.host;
+      const protocol = req.headers['x-forwarded-proto'] || 'http';
+      const callbackUrl = `${protocol}://${host}/api/casino/callback`;
       
       const payload = {
         username: (username || "testuser_" + Date.now()).toLowerCase(),
         gameId: gameId || "874c49d5d915de9b82f66088f9794789", 
         lang: "en",
-        money: balance || 0, // Sending current app balance to the game
+        money: balance || 0,
         home_url: origin,
+        callback_url: callbackUrl, 
         platform: 1,
         currency: currency || "BDT"
       };
 
       console.log(`Launching game for ${payload.username} with balance ${payload.money}`);
 
-      const response = await fetch(`https://${CASINO_API_HOST}/getgameurl`, {
-        method: "POST",
+      const response = await axios.post(`https://${CASINO_API_HOST}/getgameurl`, payload, {
         headers: {
           "Content-Type": "application/json",
           "x-rapidapi-host": CASINO_API_HOST,
           "x-rapidapi-key": CASINO_API_KEY,
-        },
-        body: JSON.stringify(payload),
+        }
       });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error(`Casino API Error (${response.status} at /getgameurl):`, errorText);
-        throw new Error(`Casino API Error: ${response.status}`);
-      }
-      const data = await response.json();
-      console.log("Casino Game Launch Success:", data.msg);
-      res.json(data);
-    } catch (err) {
-      console.error("Casino Game URL Error:", err);
+      console.log("Casino Game Launch Success:", response.data.msg);
+      res.json(response.data);
+    } catch (err: any) {
+      console.error("Casino Game URL Error:", err.response?.data || err.message);
       res.status(500).json({ error: "Failed to generate game launch URL" });
     }
   });

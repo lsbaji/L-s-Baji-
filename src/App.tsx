@@ -1565,7 +1565,39 @@ export default function App() {
   const [showFullAbout, setShowFullAbout] = useState(false);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [tickerIndex, setTickerIndex] = useState(0);
+  const [casinoProviders, setCasinoProviders] = useState<any[]>([]);
+  const [dynamicCasinoGames, setDynamicCasinoGames] = useState<any[]>([]);
+  const [casinoLoading, setCasinoLoading] = useState(false);
 
+  useEffect(() => {
+    const fetchProviders = async () => {
+      try {
+        const response = await fetch('/api/casino/providers');
+        const data = await response.json();
+        if (data.code === 0 && data.payload) {
+          setCasinoProviders(data.payload);
+        }
+      } catch (err) {
+        console.error("Failed to load providers", err);
+      }
+    };
+    fetchProviders();
+  }, []);
+
+  const loadProviderGames = async (providerId: string) => {
+    setCasinoLoading(true);
+    try {
+      const response = await fetch(`/api/casino/games/${providerId}`);
+      const data = await response.json();
+      if (data.code === 0 && data.payload) {
+        setDynamicCasinoGames(data.payload);
+      }
+    } catch (err) {
+      console.error("Failed to load games", err);
+    } finally {
+      setCasinoLoading(false);
+    }
+  };
   useEffect(() => {
     // Correctly handle auth persistence and real-time user data
     let unsubUser: (() => void) | null = null;
@@ -2505,7 +2537,7 @@ export default function App() {
           <motion.div key="casino_launch" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[1200]">
             <CasinoGameOverlay 
               gameId={selectedGameToLaunch} 
-              username={userData?.username || auth.currentUser?.email?.split('@')[0] || 'elite_player'} 
+              username={auth.currentUser?.uid || 'anonymous'} 
               balance={userData?.balance || 0}
               onClose={() => setOverlayContent(null)} 
             />
@@ -3071,7 +3103,63 @@ export default function App() {
                       </div>
                     )}
 
-                    <div className="grid grid-cols-3 gap-3.5">
+                    {/* Dynamic Provider Section */}
+                    {(activeTab === 'casino' || activeTab === 'slots') && (
+                      <div className="space-y-6">
+                        <div className="flex items-center gap-2 px-1">
+                          <Trophy size={16} className="text-yellow-500" />
+                          <span className="text-xs font-black text-white uppercase tracking-widest">Global Providers</span>
+                        </div>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                          {casinoProviders.map((p: any) => (
+                            <button
+                              key={p.provider_id}
+                              onClick={() => { playSound('click'); loadProviderGames(p.provider_id); }}
+                              className="elite-glass p-4 rounded-2xl border border-white/5 hover:border-yellow-500/50 transition-all flex flex-col items-center justify-center gap-2 text-center group active:scale-95"
+                            >
+                              <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                <LayoutGrid size={20} className="text-yellow-500" />
+                              </div>
+                              <span className="text-[10px] font-black text-gray-400 group-hover:text-white uppercase tracking-tighter truncate w-full">{p.provider_name}</span>
+                            </button>
+                          ))}
+                        </div>
+
+                        {casinoLoading ? (
+                          <div className="flex flex-col items-center py-12 gap-3">
+                            <Loader2 className="w-8 h-8 text-yellow-500 animate-spin" />
+                            <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest animate-pulse">Fetching Secure Link...</p>
+                          </div>
+                        ) : dynamicCasinoGames.length > 0 && (
+                          <div className="space-y-4">
+                            <div className="flex items-center justify-between px-1">
+                               <span className="text-[10px] font-black text-yellow-500 uppercase tracking-widest">Dynamic Games Lobby</span>
+                               <button onClick={() => setDynamicCasinoGames([])} className="text-[8px] font-black text-gray-500 uppercase underline">Clear</button>
+                            </div>
+                            <div className="grid grid-cols-3 gap-3.5">
+                              {dynamicCasinoGames.map((game: any) => (
+                                <GameCard 
+                                  key={`dynamic-${game.game_id}`} 
+                                  game={{ 
+                                    id: game.game_id, 
+                                    title: game.game_name, 
+                                    provider: game.provider_name, 
+                                    tag: 'LIVE', 
+                                    img: game.game_icon || '🎰',
+                                    color: 'from-gray-800 to-black' 
+                                  }} 
+                                  isFavorite={false} 
+                                  onToggleFavorite={() => {}} 
+                                  onClick={() => handleGameLaunch(game.game_id)} 
+                                />
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-3 gap-3.5 pt-4">
                       {(activeTab === 'favorites' ? Object.values(GAMES_DATABASE).flat().filter(game => favorites.includes(game.id)) : GAMES_DATABASE[activeTab])
                         ?.filter(game => 
                           (selectedProvider === 'All' || game.provider === selectedProvider) &&
