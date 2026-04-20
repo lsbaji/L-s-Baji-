@@ -1,0 +1,6 @@
+{
+  "appId": "com.lsbaji.elite",
+  "appName": "L's Baji Elite",
+  "webDir": "dist",
+  "bundledWebRuntime": false
+}

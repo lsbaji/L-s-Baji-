@@ -1,0 +1,25 @@
+{
+  "name": "Ls Baji Elite - Official App",
+  "short_name": "LS Baji",
+  "description": "Download Ls Baji App or Play directly in browser. Premium Casino & Sports Betting.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#060808",
+  "theme_color": "#eab308",
+  "dir": "ltr",
+  "lang": "en-US",
+  "categories": ["sports", "entertainment", "games", "casino"],
+  "icons": [
+    {
+      "src": "https://i.ibb.co/JjnF0Y5p/Gemini-Generated-Image-637gcy637gcy637g.png",
+      "sizes": "128x128",
+      "type": "image/png"
+    },
+    {
+      "src": "https://i.ibb.co/JjnF0Y5p/Gemini-Generated-Image-637gcy637gcy637g.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

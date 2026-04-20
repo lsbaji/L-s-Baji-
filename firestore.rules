@@ -1,0 +1,74 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+          (request.auth.token.email == "ritukhatun7935@gmail.com" && request.auth.token.email_verified == true));
+    }
+
+    match /affiliateRegistrations/{regId} {
+      allow create: if isAuthenticated() && 
+                    request.resource.data.email is string &&
+                    request.resource.data.fullName is string;
+      allow get: if isOwner(regId) || isAdmin();
+      allow list, update, delete: if isAdmin();
+    }
+
+    match /artifacts/{appId}/users/{userId} {
+      allow read: if isAuthenticated();
+      allow create, delete: if isOwner(userId) || isAdmin();
+      allow update: if isOwner(userId) || isAdmin() || (
+        isAuthenticated() && 
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['referralEarnings', 'totalReferralEarnings', 'referralStats'])
+      );
+
+      match /notifications/{notiId} {
+        allow read: if isOwner(userId);
+        allow update: if isOwner(userId) && 
+                      request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']);
+        allow create, delete: if isAdmin();
+      }
+
+      match /chat_messages/{msgId} {
+        allow read, write: if isOwner(userId) || isAdmin();
+      }
+
+      match /transactions/{txId} {
+        allow read, write: if isOwner(userId) || isAdmin();
+      }
+
+      match /bets/{betId} {
+        allow read, write: if isOwner(userId) || isAdmin();
+      }
+    }
+
+    match /artifacts/{appId}/referrals/{referralId} {
+      // Referrer can read their referrals, referee can read their own relationship
+      allow read: if isAuthenticated() && (
+        request.auth.uid == resource.data.referrerUid || 
+        request.auth.uid == resource.data.refereeUid || 
+        isAdmin()
+      );
+      // Referee can create the referral doc on signup
+      allow create: if isAuthenticated() && request.resource.data.refereeUid == request.auth.uid;
+      // Referee can update their own stats (deposits/wagers), Referrer can update bonusClaimed? 
+      // Actually, let's allow both to update if they are part of the relationship for now, 
+      // but ideally we'd restrict fields.
+      allow update: if isAuthenticated() && (
+        request.auth.uid == resource.data.referrerUid || 
+        request.auth.uid == resource.data.refereeUid || 
+        isAdmin()
+      );
+    }
+  }
+}

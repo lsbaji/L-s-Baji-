@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sondor Phonics Game</title>
+    <style>
+        body { 
+            background-color: #f4f7f6; 
+            font-family: 'Segoe UI', sans-serif; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            margin: 0; 
+            touch-action: manipulation; /* Prevents double-tap delay */
+        }
+        #game-container { 
+            background-color: #ffffff; 
+            padding: 20px; 
+            border-radius: 25px; 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1); 
+            text-align: center; 
+            width: 95%; 
+            max-width: 450px; 
+            height: 90vh; /* Fixed container height */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        #character-card { 
+            background-color: #e3f2fd; 
+            padding: 20px 0; 
+            border-radius: 15px; 
+            margin: 10px 0;
+            flex-grow: 1; /* Card fills remaining space */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #character-display { font-size: 6rem; color: #1976d2; font-weight: bold; margin: 0; }
+        
+        /* Button Styles */
+        #navigation-buttons { display: flex; gap: 10px; margin-top: 15px; }
+        button { 
+            background-color: #4caf50; 
+            color: white; 
+            border: none; 
+            padding: 15px; 
+            border-radius: 30px; 
+            font-size: 1.1em; 
+            cursor: pointer; 
+            transition: all 0.2s; 
+            flex: 1; /* Equal width buttons */
+        }
+        .clicked { transform: scale(0.90); opacity: 0.8; }
+        button:disabled { background-color: #cccccc; cursor: not-allowed; }
+        
+        #message-area { height: 50px; font-weight: bold; color: #2e7d32; margin-top: 10px; }
+        #progress-container { background-color: #e0e0e0; border-radius: 10px; height: 15px; width: 100%; margin-top: 10px; overflow: hidden; }
+        #progress-bar { background-color: #2196f3; height: 100%; width: 0%; transition: width 0.4s; }
+        /* New Completion/Celebration Styles */
+        @keyframes celebrate {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); color: #fbc02d; }
+            100% { transform: scale(1); }
+        }
+        .celebrate { animation: celebrate 0.5s ease-in-out; }
+        
+        #welcome-back-msg { 
+            background: #fff9c4; padding: 10px; border-radius: 10px; 
+            margin-bottom: 15px; color: #f57f17; font-weight: bold; 
+            display: none; /* hidden by default */
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <h1 id="game-header">Phonics Fun</h1>
+        <div id="welcome-back-msg">Welcome back! Ready to continue your journey?</div>
+        <div id="character-card">
+            <p id="character-display">a</p>
+        </div>
+        <div id="message-area"></div>
+        <div id="navigation-buttons">
+            <button id="prev-btn">Previous</button>
+            <button id="next-btn">Next</button>
+        </div>
+        <div id="progress-container"><div id="progress-bar"></div></div>
+    </div>
+
+    <script>
+        const characterData = [{text:"a"},{text:"e"},{text:"u"},{text:"i"},{text:"o"},{text:"kh"},{text:"b"},{text:"d"},{text:"p"},{text:"th"}];
+        
+        // Load progress from localStorage, default to 0
+        let currentCharacterIndex = parseInt(localStorage.getItem('phonicsIndex')) || 0;
+        
+        // Show welcome prompt if resuming
+        if (currentCharacterIndex > 0 && currentCharacterIndex < characterData.length - 1) {
+            document.getElementById('welcome-back-msg').style.display = 'block';
+        }
+
+        // Ensure index is within bounds
+        if (currentCharacterIndex >= characterData.length) currentCharacterIndex = 0;
+
+        const characterDisplay = document.getElementById("character-display");
+        const nextBtn = document.getElementById("next-btn");
+        const prevBtn = document.getElementById("prev-btn");
+        const progressBar = document.getElementById("progress-bar");
+        const messageArea = document.getElementById("message-area");
+
+        // বাটন ক্লিক ইফেক্ট ফাংশন
+        function triggerClickEffect(btn) {
+            btn.classList.add('clicked');
+            setTimeout(() => btn.classList.remove('clicked'), 150);
+        }
+
+        function updateDisplay() {
+            characterDisplay.textContent = characterData[currentCharacterIndex].text;
+            progressBar.style.width = `${((currentCharacterIndex + 1) / characterData.length) * 100}%`;
+            
+            // Save progress
+            localStorage.setItem('phonicsIndex', currentCharacterIndex);
+            
+            prevBtn.disabled = currentCharacterIndex === 0;
+            
+            // Completion Logic & Encouragement
+            if (currentCharacterIndex === characterData.length - 1) {
+                characterDisplay.classList.add('celebrate');
+                nextBtn.textContent = "Great Finish!";
+                messageArea.textContent = "🎉 Awesome! You mastered all sounds!";
+            } else {
+                characterDisplay.classList.remove('celebrate');
+                nextBtn.textContent = "Next";
+                messageArea.textContent = currentCharacterIndex > 0 ? "Keep going, explore more sounds!" : "";
+            }
+        }
+
+        nextBtn.addEventListener("click", () => {
+            triggerClickEffect(nextBtn);
+            if (currentCharacterIndex < characterData.length - 1) {
+                currentCharacterIndex++;
+                updateDisplay();
+            } else {
+                alert("Game Complete! Great job, little learner!");
+                currentCharacterIndex = 0;
+                localStorage.setItem('phonicsIndex', 0); // Clear progress
+                updateDisplay();
+            }
+        });
+
+        prevBtn.addEventListener("click", () => {
+            triggerClickEffect(prevBtn);
+            if (currentCharacterIndex > 0) {
+                currentCharacterIndex--;
+                updateDisplay();
+            }
+        });
+
+        updateDisplay();
+    </script>
+</body>
+</html>

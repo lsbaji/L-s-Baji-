@@ -1,0 +1,57 @@
+{
+  "entities": {
+    "AffiliateRegistration": {
+      "title": "AffiliateRegistration",
+      "description": "Registration data for Partner Loyalty Challenge",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "fullName": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "expertise": { "type": "string" },
+        "willBeInYerevan": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "fullName", "email"]
+    },
+    "Notification": {
+      "title": "Notification",
+      "description": "Real-time in-app notification for a user",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "text": { "type": "string" },
+        "type": { "type": "string", "enum": ["promo", "update", "account", "win"] },
+        "read": { "type": "boolean" },
+        "time": { "type": "string", "format": "date-time" },
+        "link": { "type": "string" }
+      },
+      "required": ["title", "text", "read", "time"]
+    },
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User account data",
+      "type": "object",
+      "properties": {
+        "username": { "type": "string" },
+        "balance": { "type": "number" },
+        "role": { "type": "string" },
+        "uid": { "type": "string" }
+      }
+    }
+  },
+  "firestore": {
+    "/affiliateRegistrations/{regId}": {
+      "schema": "AffiliateRegistration",
+      "description": "Individual registrations for the loyalty challenge"
+    },
+    "/artifacts/{appId}/users/{userId}/notifications/{notiId}": {
+      "schema": "Notification",
+      "description": "User-specific real-time notifications"
+    },
+    "/artifacts/{appId}/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "Core user profile data"
+    }
+  }
+}
