@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Loader2, Maximize2, ShieldCheck, RefreshCw, AlertCircle, ExternalLink } from 'lucide-react';
+import { X, Loader2, Maximize2, ShieldCheck, RefreshCw, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface CasinoGameOverlayProps {
@@ -49,12 +49,6 @@ const CasinoGameOverlay: React.FC<CasinoGameOverlayProps> = ({ gameId, username,
     fetchGameUrl();
   }, [gameId, username]);
 
-  const handleOpenExternal = () => {
-    if (gameUrl) {
-      window.open(gameUrl, '_blank');
-    }
-  };
-
   return (
     <motion.div 
       initial={{ opacity: 0 }} 
@@ -74,16 +68,6 @@ const CasinoGameOverlay: React.FC<CasinoGameOverlayProps> = ({ gameId, username,
         </div>
         
         <div className="flex items-center gap-2">
-          {gameUrl && (
-            <button 
-              onClick={handleOpenExternal}
-              className="p-2.5 bg-yellow-500/10 hover:bg-yellow-500/20 rounded-xl transition-all text-yellow-500 border border-yellow-500/20 flex items-center gap-2 px-4"
-              title="Open in new tab"
-            >
-              <ExternalLink size={18} />
-              <span className="hidden sm:inline text-[10px] font-black uppercase">External Play</span>
-            </button>
-          )}
           <button 
             onClick={() => setIsFullScreen(!isFullScreen)}
             className="p-2.5 bg-white/5 hover:bg-white/10 rounded-xl transition-all text-gray-400 hover:text-white"
@@ -157,9 +141,8 @@ const CasinoGameOverlay: React.FC<CasinoGameOverlayProps> = ({ gameId, username,
         {gameUrl && !error && (
           <iframe 
             src={gameUrl}
-            className="w-full h-full border-0"
+            className="absolute inset-0 w-full h-full border-0"
             allow="autoplay; fullscreen; encrypted-media; camera; microphone; geolocation"
-            sandbox="allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-scripts allow-top-navigation allow-top-navigation-by-user-activation"
             title="Casino Game"
             onLoad={() => setLoading(false)}
           />

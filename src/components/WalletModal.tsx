@@ -91,8 +91,37 @@ export default function WalletModal({ onClose, onSuccess, currentBalance, initia
     setAmount('');
   }, [initialTab]);
   const [selectedPromo, setSelectedPromo] = useState(initialPromo || PROMOTIONS[0]);
-  const [selectedMethod, setSelectedMethod] = useState(PAYMENT_METHODS[0]);
-  const [selectedWithdrawMethod, setSelectedWithdrawMethod] = useState(WITHDRAW_METHODS[0]);
+  const [selectedMethod, setSelectedMethod] = useState(() => {
+    try {
+      const savedMethod = localStorage.getItem('preferred_payment_method');
+      return PAYMENT_METHODS.find(m => m.id === savedMethod) || 
+             PAYMENT_METHODS.find(m => m.id === 'bkash') || 
+             PAYMENT_METHODS[0];
+    } catch (e) {
+      return PAYMENT_METHODS.find(m => m.id === 'bkash') || PAYMENT_METHODS[0];
+    }
+  });
+  const [selectedWithdrawMethod, setSelectedWithdrawMethod] = useState(() => {
+    try {
+      const savedMethod = localStorage.getItem('preferred_withdraw_method');
+      return WITHDRAW_METHODS.find(m => m.id === savedMethod) || 
+             WITHDRAW_METHODS.find(m => m.id === 'bkash') || 
+             WITHDRAW_METHODS[0];
+    } catch (e) {
+      return WITHDRAW_METHODS.find(m => m.id === 'bkash') || WITHDRAW_METHODS[0];
+    }
+  });
+
+  const handleSelectMethod = (m: typeof PAYMENT_METHODS[0]) => {
+    setSelectedMethod(m);
+    try { localStorage.setItem('preferred_payment_method', m.id); } catch (e) {}
+  };
+
+  const handleSelectWithdrawMethod = (m: typeof WITHDRAW_METHODS[0]) => {
+    setSelectedWithdrawMethod(m);
+    try { localStorage.setItem('preferred_withdraw_method', m.id); } catch (e) {}
+  };
+
   const [selectedChannel, setSelectedChannel] = useState(CHANNELS[0]);
   const [history] = useState([
      { id: 1, type: 'deposit', amount: 1000, status: 'completed', timestamp: '2026-04-16 10:00' },
@@ -351,7 +380,7 @@ export default function WalletModal({ onClose, onSuccess, currentBalance, initia
                     {PAYMENT_METHODS.map(m => (
                       <button 
                         key={m.id}
-                        onClick={() => setSelectedMethod(m)}
+                        onClick={() => handleSelectMethod(m)}
                         className={`relative p-4 rounded-2xl border transition-all flex flex-col items-center gap-2 ${selectedMethod.id === m.id ? 'bg-yellow-500/10 border-yellow-500' : 'bg-white/5 border-white/5'}`}
                       >
                         <div className="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center text-xs font-black text-white">
@@ -573,7 +602,7 @@ export default function WalletModal({ onClose, onSuccess, currentBalance, initia
                     {WITHDRAW_METHODS.map(m => (
                       <button 
                         key={m.id}
-                        onClick={() => setSelectedWithdrawMethod(m)}
+                        onClick={() => handleSelectWithdrawMethod(m)}
                         className={`p-3 rounded-2xl border transition-all flex flex-col items-center gap-2 ${selectedWithdrawMethod.id === m.id ? 'bg-yellow-500/10 border-yellow-500' : 'bg-white/5 border-white/5'}`}
                       >
                         <div className="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center text-[10px] font-black text-white">

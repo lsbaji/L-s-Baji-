@@ -5,39 +5,34 @@ import { fileURLToPath } from "url";
 import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
 import axios from "axios";
-import admin from "firebase-admin";
-import { getFirestore } from "firebase-admin/firestore";
+import { initializeApp } from "firebase/app";
+import { getFirestore, doc, getDoc, updateDoc, increment, collection, getDocs } from "firebase/firestore";
+import fs from "fs";
 
 dotenv.config();
 
-// Firebase Admin initialization for backend sync
-try {
-  if (!admin.apps.length) {
-    admin.initializeApp({
-      projectId: "gen-lang-client-0593654539",
-    });
-  }
-} catch (e) {
-  console.error("Firebase Admin Init Error:", e);
-}
-
-// Lazy Firestore getter
-let _firestoreDb: any = null;
-const getFirestoreDb = () => {
-  if (!_firestoreDb) {
-    try {
-      _firestoreDb = getFirestore(admin.app(), "ai-studio-df493c29-c276-4f6f-9f2f-3f305cb3621d");
-    } catch (e) {
-      console.error("Firestore Init Error:", e);
-    }
-  }
-  return _firestoreDb;
-};
-
-const appId = "1:547046490689:web:a3b5378ebf80f423c8fcc0";
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Firebase Web SDK initialization for backend
+let db: any = null;
+try {
+  const configPath = path.join(__dirname, "firebase-applet-config.json");
+  if (fs.existsSync(configPath)) {
+    const rawConfig = fs.readFileSync(configPath, "utf-8");
+    const firebaseConfig = JSON.parse(rawConfig);
+    const app = initializeApp(firebaseConfig);
+    db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
+  } else {
+    console.warn("firebase-applet-config.json not found!");
+  }
+} catch (e) {
+  console.error("Firebase Web SDK Init Error:", e);
+}
+
+const getFirestoreDb = () => db;
+
+const appId = "1:547046490689:web:a3b5378ebf80f423c8fcc0";
 
 async function startServer() {
   const app = express();
@@ -46,7 +41,32 @@ async function startServer() {
   app.use(express.json());
 
   app.get("/api/health", (req, res) => {
-    res.json({ status: "ok" });
+    res.json({ 
+      status: "ok", 
+      time: new Date().toISOString(),
+      env: process.env.NODE_ENV,
+      firebase: !!admin.apps.length
+    });
+  });
+
+  app.get("/api/test-casino", async (req, res) => {
+    try {
+      const response = await axios.get(`https://${CASINO_API_HOST}/getallproviders`, {
+        headers: {
+          "x-rapidapi-host": CASINO_API_HOST,
+          "x-rapidapi-key": CASINO_API_KEY,
+        },
+        timeout: 5000
+      });
+      res.json({ 
+        success: true, 
+        type: typeof response.data, 
+        isHtml: typeof response.data === 'string' && response.data.includes('<html'),
+        preview: typeof response.data === 'string' ? response.data.substring(0, 100) : 'json'
+      });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message, stack: err.stack });
+    }
   });
 
   // API Route for Sports Data using Gemini
@@ -321,11 +341,40 @@ async function startServer() {
         },
       });
 
+      if (typeof response.data === 'string' && response.data.trim().startsWith('<')) {
+        return res.status(500).json({ 
+          code: 1, 
+          msg: "Provider error: API returned HTML. Check RapidAPI keys.",
+          debug: response.data.substring(0, 100)
+        });
+      }
+
       res.json(response.data);
     } catch (err) {
       console.error("Casino Providers Error:", err);
       res.status(500).json({ error: "Failed to fetch casino providers" });
     }
+  });
+
+  // Repair
+  app.get("/api/repair", async (req, res) => {
+      try {
+          const firestore = getFirestoreDb();
+          if (!firestore) return res.send("No DB");
+          const usersRef = collection(firestore, `artifacts/${appId}/users`);
+          const snapshot = await getDocs(usersRef);
+          let fixed = 0;
+          for (const document of snapshot.docs) {
+              const d = document.data();
+              if (d.balance === null || Number.isNaN(d.balance) || d.balance === 0 || d.balance === 500) {
+                  await updateDoc(document.ref, { balance: 5000 });
+                  fixed++;
+              }
+          }
+          res.send(`Repaired ${fixed} users.`);
+      } catch (e: any) {
+          res.send("Error " + e.message);
+      }
   });
 
   // --- Casino Callback for Seamless Wallet ---
@@ -335,11 +384,14 @@ async function startServer() {
       
       const { 
         member_account, 
+        username: rawUsername,
         bet_amount = 0, 
-        win_amount = 0, 
+        win_amount = 0,
+        action,
+        type
       } = req.body;
 
-      const username = member_account || req.body.username; 
+      const username = member_account || rawUsername; 
 
       if (!username) {
         return res.json({ success: false, msg: "Missing member account" });
@@ -348,10 +400,10 @@ async function startServer() {
       const firestore = getFirestoreDb();
       if (!firestore) return res.json({ success: false, msg: "Database connection failed" });
 
-      const userRef = firestore.doc(`artifacts/${appId}/users/${username}`);
-      const userSnap = await userRef.get();
+      const userRef = doc(firestore, `artifacts/${appId}/users/${username}`);
+      const userSnap = await getDoc(userRef);
 
-      if (!userSnap.exists) {
+      if (!userSnap.exists()) {
         console.error(`User ${username} not found for callback`);
         return res.json({ success: false, msg: "User account not found" });
       }
@@ -359,23 +411,31 @@ async function startServer() {
       const userData = userSnap.data() || {};
       const currentBalance = userData.balance || 0;
 
-      const bet = parseFloat(bet_amount.toString());
-      const win = parseFloat(win_amount.toString());
-      const newBalance = currentBalance - bet + win;
-
-      await userRef.update({ 
-        balance: newBalance,
-        totalWagered: admin.firestore.FieldValue.increment(bet),
-        updatedAt: new Date().toISOString()
-      });
-
-      console.log(`Updated balance for ${username}: ${currentBalance} -> ${newBalance}`);
+      const bet = parseFloat(bet_amount?.toString() || "0");
+      const win = parseFloat(win_amount?.toString() || "0");
+      
+      let newBalance = currentBalance;
+      
+      // Only modify balance if actual bet/win values are provided and valid numbers
+      if (!isNaN(bet) && !isNaN(win)) {
+        newBalance = currentBalance - bet + win;
+        
+        // Prevent writing NaN to the database
+        if (!isNaN(newBalance) && (bet > 0 || win > 0)) {
+            await updateDoc(userRef, { 
+               balance: newBalance,
+               totalWagered: increment(bet),
+               updatedAt: new Date().toISOString()
+            });
+            console.log(`Updated balance for ${username}: ${currentBalance} -> ${newBalance}`);
+        }
+      }
 
       return res.json({ 
         success: true, 
         msg: "Callback processed successfully", 
         handle: true, 
-        money: parseFloat(newBalance.toFixed(2)) 
+        money: parseFloat((isNaN(newBalance) ? currentBalance : newBalance).toFixed(2)) 
       });
       
     } catch (err) {
@@ -410,8 +470,8 @@ async function startServer() {
       const callbackUrl = `${protocol}://${host}/api/casino/callback`;
       
       const payload = {
-        username: (username || "testuser_" + Date.now()).toLowerCase(),
-        gameId: gameId || "874c49d5d915de9b82f66088f9794789", 
+        username: (username || "testuser" + Date.now().toString().slice(-6)).toLowerCase(),
+        gameId: gameId, 
         lang: "en",
         money: balance || 0,
         home_url: origin,
@@ -430,7 +490,22 @@ async function startServer() {
         }
       });
 
-      console.log("Casino Game Launch Success:", response.data.msg);
+      if (typeof response.data === 'string' && response.data.trim().startsWith('<')) {
+        console.error("RapidAPI returned HTML. Check API keys.");
+        return res.status(500).json({ 
+          code: 1, 
+          msg: "Provider error: RapidAPI returned HTML. This usually means a key/subscription issue.",
+          debug: response.data.substring(0, 100)
+        });
+      }
+
+      // Hack to bypass X-Frame-Options for Casino providers that use a launcher page
+      if (response.data && response.data.payload && response.data.payload.game_launch_url) {
+        if (response.data.payload.game_launch_url.includes('/game?')) {
+          response.data.payload.game_launch_url = response.data.payload.game_launch_url.replace('/game?', '/wrappedgame?');
+        }
+      }
+
       res.json(response.data);
     } catch (err: any) {
       console.error("Casino Game URL Error:", err.response?.data || err.message);

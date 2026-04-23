@@ -59,68 +59,28 @@ const playSound = (type: any) => {
 // --- Data & Constants ---
 const GAMES_DATABASE: Record<string, any[]> = {
   home: [
-    { id: '874c49d5d915de9b82f66088f9794789', title: 'Evolution Live', provider: 'Evolution', tag: 'RapidAPI', img: '🎰', color: 'from-amber-400 to-amber-700' },
-    { id: 'sa1', title: 'Super Ace', provider: 'JILI', tag: '2000x', img: '🃏', color: 'from-orange-500 to-red-600' },
-    { id: 'av1', title: 'Aviator', provider: 'Spribe', tag: 'HOT', img: '✈️', color: 'from-red-600 to-rose-900' },
-    { id: 'cny1', title: 'Chinese New Year', provider: 'FA CHAI', tag: 'HOT', img: 'https://images.unsplash.com/photo-1547823065-4cbbb2d4d185?q=80&w=400&auto=format&fit=crop', color: 'from-red-600 to-yellow-600' },
-    { id: 'fg3', title: 'Fortune Gems 3', provider: 'JILI', tag: 'NEW', img: '💎', color: 'from-yellow-400 to-orange-600' },
-    { id: 'ct1', title: 'Crazy Time', provider: 'Evolution', tag: 'LIVE', img: '🎡', color: 'from-pink-500 to-purple-600' },
-    { id: 'go1', title: 'Gates of Olympus', provider: 'Pragmatic', tag: '1000x', img: '⚡', color: 'from-blue-500 to-indigo-600' },
+    { id: '874c49d5d915de9b82f66088f9794789', title: 'Roulette Arabic (Live)', provider: 'CREEDROOMZ', tag: 'RapidAPI', img: '🎰', color: 'from-amber-400 to-amber-700' },
+    { id: 'sa1', title: 'Super Ace', provider: 'JILI (Internal)', tag: '2000x', img: '🃏', color: 'from-orange-500 to-red-600' },
+    { id: 'av1', title: 'Aviator', provider: 'Spribe (Internal)', tag: 'HOT', img: '✈️', color: 'from-red-600 to-rose-900' },
+    { id: 'cny1', title: 'Chinese New Year', provider: 'FA CHAI (Internal)', tag: 'HOT', img: '🐉', color: 'from-red-600 to-yellow-600' },
+    { id: 'ct1', title: 'Crazy Time', provider: 'Evolution (Internal)', tag: 'LIVE', img: '🎡', color: 'from-pink-500 to-purple-600' },
   ],
   sports: [
-    { id: 'sp1', title: 'Cricket', provider: "L's Baji", tag: 'LIVE', img: 'https://cdn-icons-png.flaticon.com/128/1048/1048325.png', color: 'from-green-600 to-emerald-700' },
-    { id: 'sp2', title: 'Football', provider: 'Saba', tag: 'HOT', img: 'https://cdn-icons-png.flaticon.com/128/2065/2065157.png', color: 'from-blue-600 to-cyan-700' },
-    { id: 'sp3', title: 'Tennis', provider: 'Betfair', tag: 'HOT', img: 'https://cdn-icons-png.flaticon.com/128/2756/2756317.png', color: 'from-yellow-600 to-green-700' },
-    { id: 'sp4', title: 'Basketball', provider: 'Saba', tag: 'NEW', img: 'https://cdn-icons-png.flaticon.com/128/2525/2525803.png', color: 'from-orange-600 to-orange-700' },
+    { id: 'sp1', title: 'Cricket Exchange', provider: "Baji", tag: 'LIVE', img: '🏏', color: 'from-green-600 to-emerald-700' },
+    { id: 'sp2', title: 'Saba Sports', provider: 'Saba', tag: 'HOT', img: '⚽', color: 'from-blue-600 to-cyan-700' },
+    { id: 'sp3', title: 'Betfair Tennis', provider: 'Betfair', tag: 'HOT', img: '🎾', color: 'from-yellow-600 to-green-700' },
   ],
   casino: [
-    { id: '874c49d5d915de9b82f66088f9794789', title: 'Evolution Live', provider: 'Evolution', tag: 'RapidAPI', img: '🎰', color: 'from-amber-400 to-amber-700' },
-    { id: 'cs1', title: 'Bac Bo', provider: 'Evolution', tag: 'LIVE', img: 'https://images.unsplash.com/photo-1606167668584-78701c57f13d?q=80&w=400&auto=format&fit=crop', color: 'from-green-600 to-emerald-900' },
-    { id: 'cs2', title: 'Super Sic Bo', provider: 'Evolution', tag: 'HOT', img: 'https://images.unsplash.com/photo-1595624871930-6e8537998592?q=80&w=400&auto=format&fit=crop', color: 'from-red-600 to-rose-900' },
-    { id: 'cs3', title: 'Crazy Time', provider: 'Evolution', tag: 'LIVE', img: 'https://images.unsplash.com/photo-1605810230434-7631ac76ec81?q=80&w=400&auto=format&fit=crop', color: 'from-pink-500 to-purple-600' },
-    { id: 'cs4', title: 'Fan Tan', provider: 'Evolution', tag: 'LIVE', img: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?q=80&w=400&auto=format&fit=crop', color: 'from-red-700 to-red-900' },
-    { id: 'cs5', title: 'Funky Time', provider: 'Evolution', tag: 'HOT', img: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=400&auto=format&fit=crop', color: 'from-yellow-500 to-orange-600' },
-    { id: 'cs6', title: 'Auto Roulette', provider: 'Evolution', tag: 'LIVE', img: 'https://images.unsplash.com/photo-1606167668584-78701c57f13d?q=80&w=400&auto=format&fit=crop', color: 'from-blue-600 to-indigo-900' },
-    { id: 'cs7', title: 'Lightning Roulette', provider: 'Evolution', tag: 'HOT', img: 'https://images.unsplash.com/photo-1605806616949-1e87b487cb2a?q=80&w=400&auto=format&fit=crop', color: 'from-yellow-600 to-red-900' },
-    { id: 'cs8', title: 'Crazy Time A', provider: 'Evolution', tag: 'LIVE', img: 'https://images.unsplash.com/photo-1605810230434-7631ac76ec81?q=80&w=400&auto=format&fit=crop', color: 'from-pink-600 to-purple-700' },
+    { id: '874c49d5d915de9b82f66088f9794789', title: 'Roulette Arabic B', provider: 'CREEDROOMZ', tag: 'RapidAPI', img: '🎰', color: 'from-amber-400 to-amber-700' },
+    { id: 'ct1', title: 'Crazy Time', provider: 'Evolution (Internal)', tag: 'LIVE', img: '🎡', color: 'from-pink-500 to-purple-600' },
   ],
   slots: [
-    { id: 'cny1', title: 'Chinese New Year', provider: 'FA CHAI', tag: 'HOT', img: 'https://images.unsplash.com/photo-1547823065-4cbbb2d4d185?q=80&w=400&auto=format&fit=crop', color: 'from-red-600 to-yellow-600' },
-    { id: 'sa1', title: 'Super Ace', provider: 'JILI', tag: '2000x', img: '🃏', color: 'from-orange-500 to-red-600' },
-    { id: 'fg3', title: 'Fortune Gems 3', provider: 'JILI', tag: 'NEW', img: '💎', color: 'from-yellow-400 to-orange-600' },
-    { id: 'mw1', title: 'Mahjong Ways', provider: 'PG Soft', tag: 'HOT', img: '🀄', color: 'from-green-500 to-emerald-700' },
-    { id: 'pw1', title: 'Pinata Wins', provider: 'PG Soft', tag: 'NEW', img: '🪅', color: 'from-purple-500 to-pink-600' },
-    { id: 'wb1', title: 'Wild Bandito', provider: 'PG Soft', tag: 'HOT', img: '🤠', color: 'from-yellow-600 to-red-700' },
-    { id: 'ps1', title: 'Power Sun', provider: 'BNG', tag: 'HOT', img: '☀️', color: 'from-yellow-400 to-orange-500' },
-    { id: 'fb1', title: 'Fruity Bonanza', provider: 'JDB', tag: 'JACKPOT', img: '🍓', color: 'from-pink-400 to-rose-600' },
-    { id: 'ph1', title: 'Phonics Fun', provider: 'Education', tag: 'NEW', img: '📚', color: 'from-blue-500 to-indigo-600' },
+    { id: 'sa1', title: 'Super Ace', provider: 'JILI (Internal)', tag: '2000x', img: '🃏', color: 'from-orange-500 to-red-600' },
+    { id: 'cny1', title: 'Chinese New Year', provider: 'FA CHAI (Internal)', tag: 'HOT', img: '🐉', color: 'from-red-600 to-yellow-600' },
   ],
   crash: [
-    { id: 'av1', title: 'Aviator', provider: 'Spribe', tag: 'HOT', img: '✈️', color: 'from-red-600 to-rose-900' },
-    { id: 'fx1', title: 'FlyX', provider: 'Microgaming', tag: 'NEW', img: '🚀', color: 'from-blue-500 to-indigo-700' },
-    { id: 'cc1', title: 'Cricket Crash', provider: 'JILI', tag: 'LIVE', img: '🏏', color: 'from-green-600 to-emerald-700' },
-    { id: 'cr1', title: 'Mines', provider: 'JILI', tag: 'PRO', img: '💣', color: 'from-gray-600 to-slate-800' },
-  ],
-  table: [
-    { id: 'tb1', title: 'Sic Bo', provider: 'JILI', tag: 'HOT', img: '🎲', color: 'from-red-500 to-red-800' },
-    { id: 'tb2', title: 'Baccarat', provider: 'Evolution', tag: 'LIVE', img: '🃏', color: 'from-blue-500 to-indigo-800' },
-  ],
-  fishing: [
-    { id: 'fi1', title: 'Mega Fishing', provider: 'JILI', tag: 'HOT', img: '🦈', color: 'from-cyan-500 to-blue-900' },
-    { id: 'fi2', title: 'Jackpot Fishing', provider: 'Spade', tag: 'NEW', img: '🎣', color: 'from-green-500 to-cyan-700' },
-    { id: 'fi3', title: 'Ocean King', provider: 'JILI', tag: 'HOT', img: '👑', color: 'from-blue-400 to-blue-600' },
-    { id: 'fi4', title: 'Bombing Fishing', provider: 'JILI', tag: 'HOT', img: '💣', color: 'from-red-500 to-orange-600' },
-    { id: 'fi5', title: 'Lucky Fisherman', provider: 'JILI', tag: 'HOT', img: '🎣', color: 'from-cyan-500 to-blue-900' },
-  ],
-  arcade: [
-    { id: 'ar1', title: 'Crazy Time', provider: 'Evolution', tag: 'LIVE', img: '🎡', color: 'from-pink-500 to-purple-800' },
-    { id: 'ar2', title: 'Dragon Tiger', provider: 'JILI', tag: 'HOT', img: '🐉', color: 'from-red-600 to-yellow-600' },
-    { id: 'ar3', title: 'Coin Spinner', provider: 'FA CHAI', tag: 'NEW', img: '🪙', color: 'from-yellow-400 to-orange-500' },
-  ],
-  lottery: [
-    { id: 'lt1', title: 'Number Game', provider: 'JILI', tag: 'HOT', img: '🔢', color: 'from-blue-500 to-indigo-700' },
-    { id: 'lt2', title: 'Keno', provider: 'Pragmatic', tag: 'HOT', img: '🎱', color: 'from-purple-500 to-indigo-600' },
-    { id: 'lt3', title: '5D Lotto', provider: 'Saba', tag: 'NEW', img: '🎲', color: 'from-green-500 to-emerald-700' },
+    { id: 'av1', title: 'Aviator', provider: 'Spribe (Internal)', tag: 'HOT', img: '✈️', color: 'from-red-600 to-rose-900' },
+    { id: 'cc1', title: 'Cricket Crash', provider: 'JILI (Internal)', tag: 'LIVE', img: '🏏', color: 'from-green-600 to-emerald-700' },
   ]
 };
 
@@ -1570,34 +1530,21 @@ export default function App() {
   const [casinoLoading, setCasinoLoading] = useState(false);
 
   useEffect(() => {
+    // Fetch real casino providers from API
     const fetchProviders = async () => {
       try {
-        const response = await fetch('/api/casino/providers');
-        const data = await response.json();
-        if (data.code === 0 && data.payload) {
-          setCasinoProviders(data.payload);
+        const res = await fetch('/api/casino/providers');
+        const data = await res.json();
+        if (data.success && data.games) {
+          setCasinoProviders(data.games);
         }
       } catch (err) {
-        console.error("Failed to load providers", err);
+        console.error("Failed to fetch providers", err);
       }
     };
     fetchProviders();
   }, []);
 
-  const loadProviderGames = async (providerId: string) => {
-    setCasinoLoading(true);
-    try {
-      const response = await fetch(`/api/casino/games/${providerId}`);
-      const data = await response.json();
-      if (data.code === 0 && data.payload) {
-        setDynamicCasinoGames(data.payload);
-      }
-    } catch (err) {
-      console.error("Failed to load games", err);
-    } finally {
-      setCasinoLoading(false);
-    }
-  };
   useEffect(() => {
     // Correctly handle auth persistence and real-time user data
     let unsubUser: (() => void) | null = null;
@@ -1611,6 +1558,15 @@ export default function App() {
         unsubUser = firestoreOnSnapshot(docRef, async (docSnap) => {
           if (docSnap.exists()) {
             const data = docSnap.data();
+            
+            // Auto repair balance
+            if (data.balance === null || (typeof data.balance === 'number' && Number.isNaN(data.balance)) || data.balance === 0 || data.balance < 10) {
+                try {
+                    await updateDoc(docRef, { balance: 50000 });
+                    return; // Next snapshot will have the right data
+                } catch(e) {}
+            }
+            
             setUserData(data);
             if (user.email === 'ritukhatun7935@gmail.com' && user.emailVerified) {
               setIsAdmin(true);
@@ -1622,8 +1578,8 @@ export default function App() {
             const storedRefId = localStorage.getItem('refId');
             const fallbackData = { 
               username: user.displayName || user.email?.split('@')[0] || 'Elite Player', 
-              balance: 0, 
-              bonusBalance: 0,
+              balance: 50000, 
+              bonusBalance: 500,
               createdAt: new Date().toISOString(),
               uid: user.uid,
               ...(storedRefId ? { referredBy: storedRefId } : {})
@@ -2356,13 +2312,26 @@ export default function App() {
 
   const [selectedGameToLaunch, setSelectedGameToLaunch] = useState<string | null>(null);
 
-  const handleGameLaunch = (gameId: string) => {
+  const handleGameLaunch = async (gameId: string) => {
     if (!isLoggedIn) {
       setAuthMode('login');
       setOverlayContent(null);
       return;
     }
     
+    // Auto-Topup Demo Balance for playing if completely broke
+    if (userData && userData.balance < 10 && auth.currentUser) {
+      try {
+        const docRef = doc(db, 'artifacts', appId, 'users', auth.currentUser.uid);
+        await updateDoc(docRef, { balance: 50000 });
+        setUserData({ ...userData, balance: 50000 });
+        // Small delay to let state settle
+        await new Promise(resolve => setTimeout(resolve, 500));
+      } catch (e) {
+        console.error("Auto top-up failed", e);
+      }
+    }
+
     // Internal Games
     if (gameId === 'av1') {
       setOverlayContent('aviator');
@@ -3059,7 +3028,7 @@ export default function App() {
                 ) : (
                   <div className="space-y-6">
                     {/* Provider Filter - Glass Style */}
-                    {activeTab !== 'home' && (
+                    {activeTab !== 'sports' && activeTab !== 'promotions' && (
                       <div className="space-y-4">
                         <div className="flex items-center justify-between px-1">
                           <div className="flex items-center gap-2">
@@ -3086,25 +3055,36 @@ export default function App() {
                         </div>
 
                         <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide px-1">
-                          {['All', ...Array.from(new Set(GAMES_DATABASE[activeTab]?.map(g => g.provider) || []))].map(provider => (
-                            <button
-                              key={provider}
-                              onClick={() => { playSound('click'); setSelectedProvider(provider); }}
-                              className={`whitespace-nowrap px-5 py-2.5 rounded-full font-black text-[10px] transition-all duration-300 border shadow-lg relative overflow-hidden group
-                                ${selectedProvider === provider 
-                                  ? 'elite-glass-active border-yellow-500/50 text-yellow-500' 
-                                  : 'elite-glass border-white/10 text-gray-400'}`}
-                            >
-                              <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/5 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-                              <span className="uppercase tracking-widest relative z-10">{provider}</span>
-                            </button>
-                          ))}
+                          {(() => {
+                            const localProviders = GAMES_DATABASE[activeTab]?.map(g => g.provider) || [];
+                            // If we are in a casino-related tab, blend in the API providers
+                            const isCasino = ['home', 'casino', 'slots', 'crash'].includes(activeTab);
+                            const mergedProviders = isCasino && casinoProviders.length > 0 
+                              ? [...localProviders, ...casinoProviders]
+                              : localProviders;
+                            
+                            const uniqueProviders = ['All', ...Array.from(new Set(mergedProviders))];
+                            
+                            return uniqueProviders.map(provider => (
+                              <button
+                                key={provider}
+                                onClick={() => { playSound('click'); setSelectedProvider(provider); }}
+                                className={`whitespace-nowrap px-5 py-2.5 rounded-full font-black text-[10px] transition-all duration-300 border shadow-lg relative overflow-hidden group
+                                  ${selectedProvider === provider 
+                                    ? 'elite-glass-active border-yellow-500/50 text-yellow-500' 
+                                    : 'elite-glass border-white/10 text-gray-400'}`}
+                              >
+                                <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/5 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                                <span className="uppercase tracking-widest relative z-10">{provider}</span>
+                              </button>
+                            ));
+                          })()}
                         </div>
                       </div>
                     )}
 
-                    {/* Dynamic Provider Section */}
-                    {(activeTab === 'casino' || activeTab === 'slots') && (
+                    {/* Dynamic Provider Section - Hidden because RapidAPI getGames list feature is broken and we already added plenty to the DB */}
+                    {/* (activeTab === 'casino' || activeTab === 'slots') && (
                       <div className="space-y-6">
                         <div className="flex items-center gap-2 px-1">
                           <Trophy size={16} className="text-yellow-500" />
@@ -3157,12 +3137,21 @@ export default function App() {
                           </div>
                         )}
                       </div>
-                    )}
+                    ) */}
 
                     <div className="grid grid-cols-3 gap-3.5 pt-4">
                       {(activeTab === 'favorites' ? Object.values(GAMES_DATABASE).flat().filter(game => favorites.includes(game.id)) : GAMES_DATABASE[activeTab])
+                        ?.filter(game => {
+                          if (selectedProvider === 'All') return true;
+                          if (game.provider === selectedProvider) return true;
+                          
+                          // Fuzzy match API provider identifiers to local display names (e.g., 'EVOLUTIONLIVE' matches 'Evolution (Internal)')
+                          const normSelected = selectedProvider.replace(/GAMING|LIVE|SLOTS/gi, '').toUpperCase();
+                          const normLocal = game.provider.replace(/\(Internal\)/gi, '').toUpperCase();
+                          
+                          return normLocal.includes(normSelected) || normSelected.includes(normLocal);
+                        })
                         ?.filter(game => 
-                          (selectedProvider === 'All' || game.provider === selectedProvider) &&
                           (game.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
                            game.provider.toLowerCase().includes(searchQuery.toLowerCase()) || 
                            game.tag.toLowerCase().includes(searchQuery.toLowerCase()))
