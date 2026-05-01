@@ -1546,6 +1546,22 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    // Fetch real casino providers from API
+    const fetchProviders = async () => {
+      try {
+        const res = await fetch('/api/casino/providers');
+        const data = await res.json();
+        if (data.success && data.games) {
+          setCasinoProviders(data.games);
+        }
+      } catch (err) {
+        console.error("Failed to fetch providers", err);
+      }
+    };
+    fetchProviders();
+  }, []);
+
+  useEffect(() => {
     // Correctly handle auth persistence and real-time user data
     let unsubUser: (() => void) | null = null;
     const unsubscribe = onAuthStateChanged(auth, async (user) => {

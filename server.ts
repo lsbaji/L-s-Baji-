@@ -361,6 +361,27 @@ async function startServer() {
       try {
           const firestore = getFirestoreDb();
           if (!firestore) return res.send("No DB");
+          const usersRef = firestore.collection(`artifacts/${appId}/users`);
+          const snapshot = await usersRef.get();
+          let fixed = 0;
+          for (const doc of snapshot.docs) {
+              const d = doc.data();
+              if (d.balance === null || Number.isNaN(d.balance)) {
+                  await doc.ref.update({ balance: 500 });
+                  fixed++;
+              }
+          }
+          res.send(`Repaired ${fixed} users.`);
+      } catch (e) {
+          res.send("Error " + e.message);
+      }
+  });
+
+  // Repair
+  app.get("/api/repair", async (req, res) => {
+      try {
+          const firestore = getFirestoreDb();
+          if (!firestore) return res.send("No DB");
           const usersRef = collection(firestore, `artifacts/${appId}/users`);
           const snapshot = await getDocs(usersRef);
           let fixed = 0;
